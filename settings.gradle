@@ -1,1 +1,1 @@
-include ':app',":Elastos.NET.Hive.Java.SDK"
+include ':app' ,":Elastos.NET.Hive.Java.SDK"
