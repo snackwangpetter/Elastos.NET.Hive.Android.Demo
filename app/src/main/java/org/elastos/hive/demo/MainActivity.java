@@ -1,10 +1,15 @@
 package org.elastos.hive.demo;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -13,6 +18,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+
 import org.elastos.hive.demo.utils.ToastUtils;
 
 import jahirfiquitiva.libs.fabsmenu.FABsMenu;
@@ -29,12 +35,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     Fragment fragment;
 
+    private String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    private final int REQUEST_STOREAGE_PERMISSION = 1234;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            int checkSelfPermission = ContextCompat.checkSelfPermission(getApplicationContext(), permissions[0]);
+            if (checkSelfPermission != PackageManager.PERMISSION_GRANTED) {
+                startRequestPermission();
+            }
+        }
         setContentView(R.layout.activity_main);
 
         initView();
+    }
+
+    private void startRequestPermission() {
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_STOREAGE_PERMISSION);
     }
 
     private void initView() {
@@ -159,4 +177,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         exit();
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_STOREAGE_PERMISSION) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    ToastUtils.showShortToastSafe("Access failed, open manually!");
+                }
+            }
+        }
+    }
+
 }
