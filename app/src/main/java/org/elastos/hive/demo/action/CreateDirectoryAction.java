@@ -11,9 +11,11 @@ public class CreateDirectoryAction extends AsyncTask <Void,String,Directory>{
 
     private ActionCallback actionCallback ;
     private BaseDataCenter dataCenter ;
-    public CreateDirectoryAction(BaseDataCenter dataCenter , ActionCallback actionCallback){
+    private String fileAbsPath ;
+    public CreateDirectoryAction(BaseDataCenter dataCenter , ActionCallback actionCallback ,String fileAbsPath){
         this.actionCallback = actionCallback ;
         this.dataCenter = dataCenter ;
+        this.fileAbsPath = fileAbsPath ;
     }
 
 
@@ -22,9 +24,9 @@ public class CreateDirectoryAction extends AsyncTask <Void,String,Directory>{
         Directory directory = null;
 
         if (dataCenter instanceof IPFSDataCenter){
-            ((IPFSDataCenter) dataCenter).docreateDirectory(null);
+            ((IPFSDataCenter) dataCenter).docreateDirectory(fileAbsPath);
         }
-        return null;
+        return directory;
     }
 
 

@@ -8,7 +8,6 @@ import org.elastos.hive.demo.base.BaseDataCenter;
 import org.elastos.hive.demo.base.BasePresenter;
 import org.elastos.hive.demo.utils.FileUtils;
 import org.elastos.hive.demo.utils.ToastUtils;
-
 import java.util.ArrayList;
 
 public class MainPresenter extends BasePresenter {
@@ -45,8 +44,9 @@ public class MainPresenter extends BasePresenter {
 
                             switch (type){
                                 case ACTION_GET_CHILDREN:
+                                    ArrayList<FileItem> arrayList = (ArrayList<FileItem>) body;
 
-                                    iView.refreshListView((ArrayList<FileItem>) body);
+                                    iView.refreshListView(arrayList);
                                     iView.refreshTitleView(getCurrentPath());
                                     iView.refreshListViewFinish();
                                     break;
@@ -154,7 +154,7 @@ public class MainPresenter extends BasePresenter {
             case INTERNAL_STORAGE_TYPE:
                 break;
             case IPFS_TYPE:
-                ((IPFSDataCenter)getDataCenter()).createDirectory();
+                ((IPFSDataCenter)getDataCenter()).createDirectory(getCurrentPath()+"/test"+System.currentTimeMillis());
                 break;
         }
     }

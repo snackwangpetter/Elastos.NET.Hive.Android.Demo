@@ -2,7 +2,6 @@ package org.elastos.hive.demo;
 
 import org.elastos.hive.demo.base.BaseDataCenter;
 import org.elastos.hive.demo.utils.FileUtils;
-import org.elastos.hive.demo.utils.HiveFileFilter;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -26,10 +25,10 @@ public class InternalStorageDataCenter extends BaseDataCenter {
             fileItem.setFileAbsPath(file.getAbsolutePath());
             if (FileUtils.isFile(file)){
                 fileItem.setFolder(false);
-                fileItem.setFileSize("大小："+FileUtils.getReadableFileSize(FileUtils.getFileLength(file)));
+                fileItem.setFileDetail("大小："+FileUtils.getReadableFileSize(FileUtils.getFileLength(file)));
             }else{
                 fileItem.setFolder(true);
-                fileItem.setFileSize("文件："+FileUtils.getFileList(file.getAbsolutePath(),fileFilter,isGreater,targetSize).size());
+                fileItem.setFileDetail("文件："+FileUtils.getFileList(file.getAbsolutePath(),fileFilter,isGreater,targetSize).size());
             }
 
             if (file.isFile()){

@@ -41,7 +41,7 @@
             <!--style="@style/LFile_item_text_detail"-->
             <!--android:text="类型"/>-->
         <TextView
-            android:id="@+id/listitem_tv_size"
+            android:id="@+id/listitem_tv_detail"
             style="@style/LFile_item_text_detail"
             android:text=""/>
     </LinearLayout>

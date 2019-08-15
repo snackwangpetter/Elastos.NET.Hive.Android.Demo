@@ -22,7 +22,7 @@ public class MainAdapter extends BaseQuickAdapter<FileItem,BaseViewHolder> {
 
         helper.setText(R.id.listitem_tv_name,item.getFileName());
 
-        helper.setText(R.id.listitem_tv_size,item.getFileSize());
+        helper.setText(R.id.listitem_tv_detail,item.getFileDetail());
     }
 
 

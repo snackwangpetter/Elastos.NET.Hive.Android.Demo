@@ -1,15 +1,18 @@
 package org.elastos.hive.demo;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.elastos.hive.Children;
 import org.elastos.hive.Client;
 import org.elastos.hive.Directory;
 import org.elastos.hive.Drive;
+import org.elastos.hive.File;
 import org.elastos.hive.HiveException;
 import org.elastos.hive.IPFSEntry;
 import org.elastos.hive.demo.action.CreateDirectoryAction;
-import org.elastos.hive.demo.action.GetChildrenAction;
+import org.elastos.hive.demo.action.GetChildrenAndInfoAction;
+import org.elastos.hive.demo.action.GetInfoAction;
 import org.elastos.hive.demo.action.InitAction;
 import org.elastos.hive.demo.base.ActionCallback;
 import org.elastos.hive.vendors.ipfs.IPFSParameter;
@@ -45,7 +48,7 @@ public class IPFSDataCenter extends BaseDataCenter {
 //    private Directory directory ;
 
     public void init(){
-        new InitAction(this,actionCallback).execute(null,null,null);
+        new InitAction(this,actionCallback).execute();
     }
 
     public void doInit(){
@@ -83,10 +86,10 @@ public class IPFSDataCenter extends BaseDataCenter {
         return drive;
     }
 
-    public Children doGetChildren(){
+    public Children doGetChildren(String path){
         Children children = null;
         try {
-            Directory directory = getDefaultDrive().getDirectory(currentPath).get();
+            Directory directory = getDefaultDrive().getDirectory(path).get();
             children = directory.getChildren().get();
         } catch (ExecutionException e) {
 
@@ -101,14 +104,24 @@ public class IPFSDataCenter extends BaseDataCenter {
     @Override
     protected ArrayList getChildrenDetails(String path) {
         ArrayList<FileItem> arrayList = new ArrayList<>();
-        new GetChildrenAction(this , actionCallback).execute(null,null,null);
+//        new GetChildrenAction(this , actionCallback).execute(null,null,null);
+        new GetChildrenAndInfoAction(this,actionCallback,path).execute();
         return arrayList;
+    }
+
+    public void getChildrenAndInfo(){
+
+
+    }
+
+    public void dogetChildrenAndInfo(ArrayList<FileItem> fileItems){
+
     }
 
 
     public void docreateDirectory(String path){
         try {
-            drive.createDirectory("/test"+System.currentTimeMillis()).get();
+            drive.createDirectory(path).get();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -116,9 +129,45 @@ public class IPFSDataCenter extends BaseDataCenter {
         }
     }
 
-    public void createDirectory(){
-        new CreateDirectoryAction(this,actionCallback).execute(null,null,null);
+    public void createDirectory(String fileAbsPath){
+        new CreateDirectoryAction(this,actionCallback , fileAbsPath).execute();
     }
+
+    public void getFileInfo(String path){
+        new GetInfoAction(this,actionCallback,path).execute();
+    }
+
+    public File.Info doGetFileInfo(File file){
+        File.Info fileInfo = null ;
+        try {
+            fileInfo = file.getInfo().get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return fileInfo ;
+    }
+
+    public void getFile(String path){
+
+    }
+
+    public File doGetFile(String path){
+        File file = null;
+        try {
+            file = drive.getFile(path).get();
+
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return file ;
+    }
+
 
 
 

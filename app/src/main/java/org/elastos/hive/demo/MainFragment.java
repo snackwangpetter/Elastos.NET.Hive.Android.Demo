@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,6 +61,8 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
     }
     private void initView(View rootView){
         tvPath = (TextView) rootView.findViewById(R.id.tv_path);
+        tvPath.setMovementMethod(ScrollingMovementMethod.getInstance());
+//        tvPath.setSelected(true);
         setTitlePath(presenter.getCurrentPath());
         initRefreshLayout(rootView);
         initRecyclerView(rootView);
@@ -110,7 +113,7 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
 
         ((ImageView)headView.findViewById(R.id.listitem_iv_type)).setBackgroundResource(R.mipmap.lfile_folder_style_green);
         ((TextView)headView.findViewById(R.id.listitem_tv_name)).setText("..");
-        ((TextView)headView.findViewById(R.id.listitem_tv_size)).setText("父目录");
+        ((TextView)headView.findViewById(R.id.listitem_tv_detail)).setText("父目录");
 
         headView.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -3,7 +3,7 @@ package org.elastos.hive.demo;
 public class FileItem {
     private String fileName ;
     private String fileAbsPath ;
-    private String fileSize ;
+    private String fileDetail;
     private boolean isFolder ;
 
     public FileItem(String fileName) {
@@ -26,12 +26,12 @@ public class FileItem {
         this.fileName = fileName;
     }
 
-    public String getFileSize() {
-        return fileSize;
+    public String getFileDetail() {
+        return fileDetail;
     }
 
-    public void setFileSize(String fileSize) {
-        this.fileSize = fileSize;
+    public void setFileDetail(String fileDetail) {
+        this.fileDetail = fileDetail;
     }
 
     public boolean isFolder() {

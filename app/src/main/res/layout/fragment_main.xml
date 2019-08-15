@@ -16,6 +16,9 @@
         android:singleLine="true"
         android:background="@color/lfile_gray"
         android:padding="8dp"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:ellipsize="marquee"
+        android:focusableInTouchMode="true"
         android:text="internalstorage"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
