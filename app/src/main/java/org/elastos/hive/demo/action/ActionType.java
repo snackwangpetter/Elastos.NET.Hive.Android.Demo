@@ -6,5 +6,6 @@ public enum ActionType {
     ACTION_CREATE_DIR ,
     ACTION_FILE_INFO ,
     ACTION_GET_FILE ,
-    ACTION_CREATE_File
+    ACTION_CREATE_File ,
+    ACTION_UPLOAD_FILE
 }

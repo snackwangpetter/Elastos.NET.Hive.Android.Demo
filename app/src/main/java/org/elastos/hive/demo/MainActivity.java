@@ -19,7 +19,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 
+import org.elastos.hive.demo.utils.FileUtils;
 import org.elastos.hive.demo.utils.ToastUtils;
+
+import java.io.File;
 
 import jahirfiquitiva.libs.fabsmenu.FABsMenu;
 import jahirfiquitiva.libs.fabsmenu.TitleFAB;
@@ -34,6 +37,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FABsMenu fabsMenu;
 
     Fragment fragment;
+
+    private TitleFAB newFile , newDirectory , uploadFile ;
+
+    private final int MENU_TYPE_NEW_FILE = 0;
+    private final int MENU_TYPE_NEW_DIRECTORY = 1;
+    private final int MENU_TYPE_UPLOAD_FILE = 2 ;
+
+
 
     private String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private final int REQUEST_STOREAGE_PERMISSION = 1234;
@@ -116,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.internalstorage:
                 toolbar.setTitle(R.string.internalstorage);
                 ((MainFragment)fragment).presenter.changeClientType(ClientType.INTERNAL_STORAGE_TYPE);
+
                 break;
             case R.id.onedrive:
                 toolbar.setTitle(R.string.onedrive);
@@ -138,23 +150,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fabsMenu = findViewById(R.id.fabs_menu);
         fabsMenu.setAnimationDuration(500);
 
-        initFabTitle(findViewById(R.id.menu_new_folder), 0);
-        initFabTitle(findViewById(R.id.menu_new_file), 1);
+        newFile = findViewById(R.id.menu_new_file);
+        newDirectory = findViewById(R.id.menu_new_folder);
+        uploadFile = findViewById(R.id.menu_upload_file);
+
+        initFabTitle(newDirectory, MENU_TYPE_NEW_DIRECTORY);
+        initFabTitle(newFile, MENU_TYPE_NEW_FILE);
+        initFabTitle(uploadFile , MENU_TYPE_UPLOAD_FILE);
+
     }
 
     private void initFabTitle(TitleFAB fabTitle, int type) {
         fabTitle.setOnClickListener(view -> {
             String currentPath = ((MainFragment)getFragmentAtFrame()).presenter.getCurrentPath();
             switch (type){
-                case 0:
+                case MENU_TYPE_NEW_DIRECTORY:
                     ToastUtils.showShortToastSafe(currentPath+" ; type = 0");
 
                     ((MainFragment)getFragmentAtFrame()).presenter.createDirectory(currentPath+"/test"+System.currentTimeMillis());
                     break;
-                case 1:
+                case MENU_TYPE_NEW_FILE:
                     ToastUtils.showShortToastSafe(currentPath+" ; type = 1");
                     ((MainFragment)getFragmentAtFrame()).presenter.createFile(currentPath+"/test"+System.currentTimeMillis());
                     break;
+
+                case MENU_TYPE_UPLOAD_FILE:
+
+                    String internalFilePath = "/storage/emulated/0/test.txt";
+                    File file = new File(internalFilePath);
+                    String fileName = file.getName();
+                    String ipfsAbsFilePath = FileUtils.appendParentPath(currentPath,fileName);
+
+                    ((MainFragment)getFragmentAtFrame()).presenter.uploadFile(ipfsAbsFilePath,internalFilePath);
+                    ToastUtils.showShortToastSafe(currentPath+" ; type = 2");
             }
             fabsMenu.collapse();
         });

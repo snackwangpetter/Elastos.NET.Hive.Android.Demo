@@ -10,16 +10,20 @@ import org.elastos.hive.Drive;
 import org.elastos.hive.File;
 import org.elastos.hive.HiveException;
 import org.elastos.hive.IPFSEntry;
+import org.elastos.hive.Length;
 import org.elastos.hive.demo.action.CreateDirectoryAction;
 import org.elastos.hive.demo.action.CreateFileAction;
 import org.elastos.hive.demo.action.GetChildrenAndInfoAction;
 import org.elastos.hive.demo.action.GetInfoAction;
 import org.elastos.hive.demo.action.InitAction;
+import org.elastos.hive.demo.action.UploadFileAction;
 import org.elastos.hive.demo.base.ActionCallback;
+import org.elastos.hive.demo.utils.FileUtils;
 import org.elastos.hive.vendors.ipfs.IPFSParameter;
 
 import org.elastos.hive.demo.base.BaseDataCenter;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -185,5 +189,18 @@ public class IPFSDataCenter extends BaseDataCenter {
         }
 
         return file ;
+    }
+
+    public void uploadFile(String ipfsAbsPath , String internalFileAbsPath){
+        new UploadFileAction(this,actionCallback,internalFileAbsPath,ipfsAbsPath).execute();
+    }
+
+    public void doUploadFile(String ipfsAbsPath , String internalFileAbsPath) throws ExecutionException, InterruptedException {
+        File file = drive.createFile(ipfsAbsPath).get();
+
+        ByteBuffer writeBuffer = FileUtils.file2ByteBuffer(internalFileAbsPath);
+
+        file.write(writeBuffer).get();
+        file.commit().get();
     }
 }

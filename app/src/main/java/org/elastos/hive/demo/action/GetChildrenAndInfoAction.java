@@ -10,6 +10,7 @@ import org.elastos.hive.demo.FileItem;
 import org.elastos.hive.demo.IPFSDataCenter;
 import org.elastos.hive.demo.base.ActionCallback;
 import org.elastos.hive.demo.base.BaseDataCenter;
+import org.elastos.hive.demo.utils.FileUtils;
 
 import java.util.ArrayList;
 
@@ -43,12 +44,7 @@ public class GetChildrenAndInfoAction extends AsyncTask<Void, String, ArrayList<
                 //create FileItem
                 FileItem fileItem = new FileItem(fileName);
                 //create file abs path
-                String fileAbsPath;
-                if (parentPath.equals("/")){
-                    fileAbsPath = parentPath+fileName ;
-                }else{
-                    fileAbsPath = parentPath+"/"+fileName ;
-                }
+                String fileAbsPath = FileUtils.appendParentPath(parentPath,fileName);
 
                 //get file
                 File file = ((IPFSDataCenter) dataCenter).doGetFile(fileAbsPath);

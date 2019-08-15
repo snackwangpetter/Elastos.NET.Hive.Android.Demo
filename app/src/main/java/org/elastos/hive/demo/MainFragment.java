@@ -87,6 +87,22 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
                 }
             }
         });
+
+        adapter.setOnItemLongClickListener(new BaseQuickAdapter.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(BaseQuickAdapter adapter, View view, int position) {
+                FileItem item = (FileItem) adapter.getData().get(position);
+                if (item.isFolder()){
+                    ToastUtils.showShortToastSafe(item.getFileName());
+                }else{
+                    //TODO show confirm dialog
+                    //TODO show internal storage save path select dialog
+                    //TODO download
+                }
+
+                return false;
+            }
+        });
         return adapter;
     }
 

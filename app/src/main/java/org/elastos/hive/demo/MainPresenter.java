@@ -59,6 +59,9 @@ public class MainPresenter extends BasePresenter {
                                 case ACTION_CREATE_File:
                                     refreshData();
                                     break;
+                                case ACTION_UPLOAD_FILE:
+                                    refreshData();
+                                    break;
                             }
 
 
@@ -185,6 +188,16 @@ public class MainPresenter extends BasePresenter {
                 break;
             case IPFS_TYPE:
                 ((IPFSDataCenter)getDataCenter()).createFile(fileAbsPath);
+                break;
+        }
+    }
+
+    public void uploadFile(String ipfsAbsPath , String internalFileAbsPath){
+        switch (currentClientType){
+            case INTERNAL_STORAGE_TYPE:
+                break;
+            case IPFS_TYPE:
+                ((IPFSDataCenter)getDataCenter()).uploadFile(ipfsAbsPath , internalFileAbsPath);
                 break;
         }
     }

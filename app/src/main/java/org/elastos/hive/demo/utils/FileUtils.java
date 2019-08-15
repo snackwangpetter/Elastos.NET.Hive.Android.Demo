@@ -4,6 +4,10 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.FileSystem;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -100,5 +104,74 @@ public class FileUtils {
             return path.substring(0, index);
         }
         return "/";
+    }
+
+    public static ByteBuffer file2ByteBuffer(String path) {
+        FileInputStream fileInputStream = null;
+        FileChannel inChannel = null;
+        try {
+            fileInputStream = new FileInputStream(path);
+            inChannel = fileInputStream.getChannel();
+            ByteBuffer buffer = ByteBuffer.allocate(fileInputStream.available());
+            inChannel.read(buffer);
+            buffer.flip();
+            return buffer;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (inChannel != null) {
+                    inChannel.close();
+                }
+
+                if (fileInputStream != null) {
+                    fileInputStream.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
+    }
+
+    public static void ByteBuffer2File(String path, ByteBuffer buffer) {
+        FileChannel outputChannel = null;
+        FileOutputStream outputStream = null;
+        try {
+            buffer.flip();
+            java.io.File file = new java.io.File(path);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+            outputStream = new FileOutputStream(path, true);
+            outputChannel = outputStream.getChannel();
+            outputChannel.write(buffer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                outputChannel.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            try {
+                outputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static String appendParentPath(String parentPath , String fileName){
+        String fileAbsPath = "";
+        if (parentPath.equals("/")){
+            fileAbsPath = parentPath+fileName ;
+        }else{
+            fileAbsPath = parentPath+"/"+fileName ;
+        }
+        return fileAbsPath ;
     }
 }
