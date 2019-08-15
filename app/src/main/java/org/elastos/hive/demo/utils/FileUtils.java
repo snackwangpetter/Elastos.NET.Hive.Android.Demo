@@ -135,7 +135,7 @@ public class FileUtils {
         return null;
     }
 
-    public static void ByteBuffer2File(String path, ByteBuffer buffer) {
+    public static void byteBuffer2File(String path, ByteBuffer buffer , boolean isAppend) {
         FileChannel outputChannel = null;
         FileOutputStream outputStream = null;
         try {
@@ -145,7 +145,7 @@ public class FileUtils {
                 file.createNewFile();
             }
 
-            outputStream = new FileOutputStream(path, true);
+            outputStream = new FileOutputStream(path, isAppend);
             outputChannel = outputStream.getChannel();
             outputChannel.write(buffer);
         } catch (Exception e) {

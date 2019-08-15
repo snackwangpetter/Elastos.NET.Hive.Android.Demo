@@ -13,6 +13,7 @@ import org.elastos.hive.IPFSEntry;
 import org.elastos.hive.Length;
 import org.elastos.hive.demo.action.CreateDirectoryAction;
 import org.elastos.hive.demo.action.CreateFileAction;
+import org.elastos.hive.demo.action.DownloadFileAction;
 import org.elastos.hive.demo.action.GetChildrenAndInfoAction;
 import org.elastos.hive.demo.action.GetInfoAction;
 import org.elastos.hive.demo.action.InitAction;
@@ -202,5 +203,37 @@ public class IPFSDataCenter extends BaseDataCenter {
 
         file.write(writeBuffer).get();
         file.commit().get();
+    }
+
+    public void downloadFile(String ipfsAbsPath , String internalFileAbsPath){
+        new DownloadFileAction(this,actionCallback,internalFileAbsPath,ipfsAbsPath).execute();
+    }
+
+    public void doDownloadFile(String ipfsAbsPath , String internalFileAbsPath) throws ExecutionException, InterruptedException {
+        File file = doGetFile(ipfsAbsPath);
+        File.Info fileInfo = doGetFileInfo(file);
+        int size = Integer.valueOf(fileInfo.get(File.Info.size));
+
+        ByteBuffer readBuf = ByteBuffer.allocate(size);
+        Length lenObj = new Length(0);
+
+        long readLen = 0;
+        while (lenObj.getLength() != -1) {
+            ByteBuffer tmpBuf = ByteBuffer.allocate(100);
+            lenObj = file.read(tmpBuf).get();
+
+            int len = (int) lenObj.getLength();
+            if (len != -1) {
+                readLen += len;
+
+                byte[] bytes = new byte[len];
+                tmpBuf.flip();
+                tmpBuf.get(bytes, 0, len);
+                readBuf.put(bytes);
+
+                //write the content to a file.
+                FileUtils.byteBuffer2File(internalFileAbsPath, tmpBuf , false);
+            }
+        }
     }
 }

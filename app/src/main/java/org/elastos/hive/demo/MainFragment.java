@@ -21,6 +21,7 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import org.elastos.hive.demo.base.BaseFragment;
 import org.elastos.hive.demo.utils.ToastUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class MainFragment extends BaseFragment implements MainPresenter.IView{
@@ -84,25 +85,16 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
                     presenter.refreshData();
                 }else {
                     ToastUtils.showShortToast("click: "+fileAbsPath);
-                }
-            }
-        });
-
-        adapter.setOnItemLongClickListener(new BaseQuickAdapter.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(BaseQuickAdapter adapter, View view, int position) {
-                FileItem item = (FileItem) adapter.getData().get(position);
-                if (item.isFolder()){
-                    ToastUtils.showShortToastSafe(item.getFileName());
-                }else{
                     //TODO show confirm dialog
                     //TODO show internal storage save path select dialog
-                    //TODO download
-                }
+                    String saveFilePath = "/storage/emulated/0/test/testdownload.txt";
 
-                return false;
+                    presenter.excuteFile(item , saveFilePath);
+
+                }
             }
         });
+
         return adapter;
     }
 

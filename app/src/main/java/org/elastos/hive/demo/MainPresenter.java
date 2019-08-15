@@ -202,6 +202,32 @@ public class MainPresenter extends BasePresenter {
         }
     }
 
+    public void downloadFile(String ipfsAbsPath , String internalFileAbsPath){
+        switch (currentClientType){
+            case INTERNAL_STORAGE_TYPE:
+                break;
+            case IPFS_TYPE:
+                ((IPFSDataCenter)getDataCenter()).downloadFile(ipfsAbsPath , internalFileAbsPath);
+                break;
+        }
+    }
+
+    public void excuteFile(FileItem item , String saveFileAbsPath){
+        switch (currentClientType){
+            case INTERNAL_STORAGE_TYPE:
+                break;
+            case IPFS_TYPE:
+                File file  = new File(saveFileAbsPath);
+                if (file.exists()){
+                    ToastUtils.showShortToastSafe("File alread exists");
+                }else{
+                    downloadFile(item.getFileAbsPath(),file.getAbsolutePath());
+                }
+
+                break;
+        }
+    }
+
     public void returnParent(){
         String parentPath = FileUtils.getParent(getCurrentPath());
         setCurrentPath(parentPath);
