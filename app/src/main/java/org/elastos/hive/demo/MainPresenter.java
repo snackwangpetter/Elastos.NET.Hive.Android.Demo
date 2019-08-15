@@ -53,6 +53,9 @@ public class MainPresenter extends BasePresenter {
                                 case ACTION_CREATE_DIR:
                                     refreshData();
                                     break;
+                                case ACTION_CREATE_File:
+                                    refreshData();
+                                    break;
                             }
 
 
@@ -149,12 +152,22 @@ public class MainPresenter extends BasePresenter {
         return fileItems;
     }
 
-    public void createDirectory(){
+    public void createDirectory(String fileAbsPath){
         switch (currentClientType){
             case INTERNAL_STORAGE_TYPE:
                 break;
             case IPFS_TYPE:
-                ((IPFSDataCenter)getDataCenter()).createDirectory(getCurrentPath()+"/test"+System.currentTimeMillis());
+                ((IPFSDataCenter)getDataCenter()).createDirectory(fileAbsPath);
+                break;
+        }
+    }
+
+    public void createFile(String fileAbsPath){
+        switch (currentClientType){
+            case INTERNAL_STORAGE_TYPE:
+                break;
+            case IPFS_TYPE:
+                ((IPFSDataCenter)getDataCenter()).createFile(fileAbsPath);
                 break;
         }
     }

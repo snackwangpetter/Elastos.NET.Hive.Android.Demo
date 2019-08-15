@@ -144,13 +144,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initFabTitle(TitleFAB fabTitle, int type) {
         fabTitle.setOnClickListener(view -> {
+            String currentPath = ((MainFragment)getFragmentAtFrame()).presenter.getCurrentPath();
             switch (type){
                 case 0:
-                    ToastUtils.showShortToastSafe(((MainFragment)getFragmentAtFrame()).presenter.getCurrentPath()+" ; type = 0");
-                    ((MainFragment)getFragmentAtFrame()).presenter.createDirectory();
+                    ToastUtils.showShortToastSafe(currentPath+" ; type = 0");
+
+                    ((MainFragment)getFragmentAtFrame()).presenter.createDirectory(currentPath+"/test"+System.currentTimeMillis());
                     break;
                 case 1:
-                    ToastUtils.showShortToastSafe(((MainFragment)getFragmentAtFrame()).presenter.getCurrentPath()+" ; type = 1");
+                    ToastUtils.showShortToastSafe(currentPath+" ; type = 1");
+                    ((MainFragment)getFragmentAtFrame()).presenter.createFile(currentPath+"/test"+System.currentTimeMillis());
                     break;
             }
             fabsMenu.collapse();

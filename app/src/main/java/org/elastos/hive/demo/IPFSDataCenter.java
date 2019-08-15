@@ -11,6 +11,7 @@ import org.elastos.hive.File;
 import org.elastos.hive.HiveException;
 import org.elastos.hive.IPFSEntry;
 import org.elastos.hive.demo.action.CreateDirectoryAction;
+import org.elastos.hive.demo.action.CreateFileAction;
 import org.elastos.hive.demo.action.GetChildrenAndInfoAction;
 import org.elastos.hive.demo.action.GetInfoAction;
 import org.elastos.hive.demo.action.InitAction;
@@ -169,7 +170,20 @@ public class IPFSDataCenter extends BaseDataCenter {
     }
 
 
+    public void createFile(String fileAbsPath){
+        new CreateFileAction(this, actionCallback , fileAbsPath).execute();
+    }
 
+    public File doCreateFile(String fileAbsPath){
+        File file = null ;
+        try {
+            file = drive.createFile(fileAbsPath).get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-
+        return file ;
+    }
 }
