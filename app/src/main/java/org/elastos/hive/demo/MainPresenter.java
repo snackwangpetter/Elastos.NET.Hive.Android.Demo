@@ -8,6 +8,9 @@ import org.elastos.hive.demo.base.BaseDataCenter;
 import org.elastos.hive.demo.base.BasePresenter;
 import org.elastos.hive.demo.utils.FileUtils;
 import org.elastos.hive.demo.utils.ToastUtils;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class MainPresenter extends BasePresenter {
@@ -155,6 +158,11 @@ public class MainPresenter extends BasePresenter {
     public void createDirectory(String fileAbsPath){
         switch (currentClientType){
             case INTERNAL_STORAGE_TYPE:
+                File file = new File(fileAbsPath);
+                if (!file.exists()){
+                    file.mkdir();
+                }
+                refreshData();
                 break;
             case IPFS_TYPE:
                 ((IPFSDataCenter)getDataCenter()).createDirectory(fileAbsPath);
@@ -165,6 +173,15 @@ public class MainPresenter extends BasePresenter {
     public void createFile(String fileAbsPath){
         switch (currentClientType){
             case INTERNAL_STORAGE_TYPE:
+                File file = new File(fileAbsPath);
+                if (!file.exists()){
+                    try {
+                        file.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                refreshData();
                 break;
             case IPFS_TYPE:
                 ((IPFSDataCenter)getDataCenter()).createFile(fileAbsPath);
