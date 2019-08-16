@@ -30,8 +30,10 @@ public class UploadFileAction extends AsyncTask <Void,String,Void>{
             try {
                 ((IPFSDataCenter) dataCenter).doUploadFile(ipfsAbsPath,internalFileAbsPath);
             } catch (ExecutionException e) {
+                actionCallback.onFail(ActionType.ACTION_UPLOAD_FILE , e);
                 e.printStackTrace();
             } catch (InterruptedException e) {
+                actionCallback.onFail(ActionType.ACTION_UPLOAD_FILE , e);
                 e.printStackTrace();
             } catch (Exception e){
                 actionCallback.onFail(ActionType.ACTION_UPLOAD_FILE , e);

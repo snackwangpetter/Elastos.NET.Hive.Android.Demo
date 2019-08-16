@@ -30,8 +30,10 @@ public class DownloadFileAction extends AsyncTask <Void,String, Length>{
             try {
                 ((IPFSDataCenter) dataCenter).doDownloadFile(ipfsAbsPath,internalFileAbsPath);
             } catch (ExecutionException e) {
+                actionCallback.onFail(ActionType.ACTION_DOWNLOAD_FILE , e);
                 e.printStackTrace();
             } catch (InterruptedException e) {
+                actionCallback.onFail(ActionType.ACTION_DOWNLOAD_FILE , e);
                 e.printStackTrace();
             } catch (Exception e){
                 actionCallback.onFail(ActionType.ACTION_DOWNLOAD_FILE , e);
