@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/layout_item_root"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_item_root"
                 android:layout_width="match_parent"
                 android:layout_height="62dp"
                 android:layout_marginTop="10dp"
@@ -14,14 +15,6 @@
         android:layout_height="42dp"
         android:layout_centerVertical="true"/>
 
-    <!--<CheckBox-->
-        <!--android:id="@+id/cb_choose"-->
-        <!--android:theme="@style/LFileCheckBoxTheme"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_centerVertical="true"/>-->
-
     <LinearLayout
         android:id="@+id/layout_listitem_info"
         android:layout_width="match_parent"
@@ -34,24 +27,26 @@
         <TextView
             android:id="@+id/listitem_tv_name"
             style="@style/LFile_item_text_name"
-            android:text="名称"/>
+            android:text="@string/name"/>
 
-        <!--<TextView-->
-            <!--android:id="@+id/listitem_tv_style"-->
-            <!--style="@style/LFile_item_text_detail"-->
-            <!--android:text="类型"/>-->
         <TextView
             android:id="@+id/listitem_tv_detail"
             style="@style/LFile_item_text_detail"
-            android:text=""/>
+            android:text="@string/detail"/>
+
+
     </LinearLayout>
-
-
-    <!--<View-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="1px"-->
-        <!--android:layout_below="@id/layout_info"-->
-        <!--android:layout_marginTop="6dp"-->
-        <!--android:background="@color/lfile_lightgray"/>-->
+    <ImageButton
+        android:id="@+id/listitem_more_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ripple"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:padding="8dp"
+        android:src="@mipmap/ic_more_vert"/>
 
 </RelativeLayout>

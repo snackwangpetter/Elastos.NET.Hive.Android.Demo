@@ -6,6 +6,10 @@ public class Config {
     public static String INTERNAL_STORAGE_DEFAULT_PATH = Environment.getExternalStorageDirectory().getAbsolutePath();
     public static String IPFS_DEFAULT_PATH = "/";
     public static String ONEDRIVE_DEFAULT_PATH = "/";
+    public static String DEFAULT_UPLOAD_PICK_FILE_PATH = Environment.getExternalStorageDirectory().getAbsolutePath();
+    public static String DEFAULT_DOWNLOAD_PICK_FILE_PATH = Environment.getExternalStorageDirectory().getAbsolutePath();
+
+
 
     public static String getDefaultPath(ClientType clientType){
         String path = "";

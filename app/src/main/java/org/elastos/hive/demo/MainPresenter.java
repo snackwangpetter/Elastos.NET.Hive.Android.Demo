@@ -63,8 +63,6 @@ public class MainPresenter extends BasePresenter {
                                     refreshData();
                                     break;
                             }
-
-
                         }
                     });
 
@@ -89,8 +87,6 @@ public class MainPresenter extends BasePresenter {
     public MainPresenter(IView iView , Context context){
         this.iView = iView ;
         this.context = context ;
-
-
     }
 
     public void setCurrentPath(String path){
@@ -164,8 +160,10 @@ public class MainPresenter extends BasePresenter {
                 File file = new File(fileAbsPath);
                 if (!file.exists()){
                     file.mkdir();
+                    refreshData();
+                }else{
+                    iView.showSameFileDialog();
                 }
-                refreshData();
                 break;
             case IPFS_TYPE:
                 ((IPFSDataCenter)getDataCenter()).createDirectory(fileAbsPath);
@@ -180,11 +178,14 @@ public class MainPresenter extends BasePresenter {
                 if (!file.exists()){
                     try {
                         file.createNewFile();
+                        refreshData();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                }else{
+                    iView.showSameFileDialog();
                 }
-                refreshData();
+
                 break;
             case IPFS_TYPE:
                 ((IPFSDataCenter)getDataCenter()).createFile(fileAbsPath);
@@ -192,12 +193,15 @@ public class MainPresenter extends BasePresenter {
         }
     }
 
-    public void uploadFile(String ipfsAbsPath , String internalFileAbsPath){
+    public void uploadFile(String uploadFileAbsPath){
         switch (currentClientType){
             case INTERNAL_STORAGE_TYPE:
                 break;
             case IPFS_TYPE:
-                ((IPFSDataCenter)getDataCenter()).uploadFile(ipfsAbsPath , internalFileAbsPath);
+                File file = new File(uploadFileAbsPath);
+                String fileName = file.getName();
+                String ipfsAbsFilePath = FileUtils.appendParentPath(getCurrentPath(),fileName);
+                ((IPFSDataCenter)getDataCenter()).uploadFile(ipfsAbsFilePath , uploadFileAbsPath);
                 break;
         }
     }
@@ -217,13 +221,15 @@ public class MainPresenter extends BasePresenter {
             case INTERNAL_STORAGE_TYPE:
                 break;
             case IPFS_TYPE:
-                File file  = new File(saveFileAbsPath);
+                String fileName = item.getFileName();
+                String appendAbsPath = FileUtils.appendParentPath(saveFileAbsPath,fileName);
+
+                File file  = new File(appendAbsPath);
                 if (file.exists()){
-                    ToastUtils.showShortToastSafe("File alread exists");
+                    iView.showSameFileDialog();
                 }else{
                     downloadFile(item.getFileAbsPath(),file.getAbsolutePath());
                 }
-
                 break;
         }
     }
@@ -256,5 +262,7 @@ public class MainPresenter extends BasePresenter {
         void showProgressBar();
 
         void hideProgressBar();
+
+        void showSameFileDialog();
     }
 }

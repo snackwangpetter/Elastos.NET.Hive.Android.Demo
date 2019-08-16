@@ -1,27 +1,34 @@
 package org.elastos.hive.demo;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.view.menu.MenuPopupHelper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 
 import org.elastos.hive.demo.base.BaseFragment;
 import org.elastos.hive.demo.utils.ToastUtils;
+import org.elastos.hive.demo.utils.Utils;
 
-import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public class MainFragment extends BaseFragment implements MainPresenter.IView{
@@ -30,7 +37,7 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
     private BaseQuickAdapter adapter;
     private TextView tvPath ;
     public MainPresenter presenter ;
-    public RelativeLayout progressLayout;
+    private MaterialDialog progressDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,13 +70,11 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
     private void initView(View rootView){
         tvPath = (TextView) rootView.findViewById(R.id.tv_path);
         tvPath.setMovementMethod(ScrollingMovementMethod.getInstance());
-//        tvPath.setSelected(true);
         setTitlePath(presenter.getCurrentPath());
         initRefreshLayout(rootView);
         initRecyclerView(rootView);
         addHeadView();
 
-        progressLayout = rootView.findViewById(R.id.progress_layout);
     }
 
     private BaseQuickAdapter initAdapter(ArrayList arrayList){
@@ -77,6 +82,8 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+
+                ToastUtils.showShortToastSafe("view"+view.getId()+position);
                 FileItem item = (FileItem) adapter.getData().get(position);
                 String fileAbsPath = item.getFileAbsPath();
 
@@ -84,16 +91,26 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
                     presenter.setCurrentPath(fileAbsPath);
                     presenter.refreshData();
                 }else {
-                    ToastUtils.showShortToast("click: "+fileAbsPath);
-                    //TODO show confirm dialog
-                    //TODO show internal storage save path select dialog
-                    String saveFilePath = "/storage/emulated/0/test/testdownload.txt";
-
-                    presenter.excuteFile(item , saveFilePath);
-
+                    if (presenter.getCurrentClientType() != ClientType.INTERNAL_STORAGE_TYPE){
+                        showOneButtonDialog("Cannot open the remote file directly, please download the file locally first");
+                    }else{
+                        ToastUtils.showShortToast("click: "+fileAbsPath);
+                    }
                 }
             }
+
+
         });
+
+        adapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
+            @Override
+            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
+                FileItem fileItem = (FileItem) adapter.getData().get(position);
+                Toast.makeText(getActivity(), "onItemChildClick" + position, Toast.LENGTH_SHORT).show();
+                showPopupMenu(view , fileItem);
+            }
+        });
+
 
         return adapter;
     }
@@ -122,6 +139,7 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
         ((ImageView)headView.findViewById(R.id.listitem_iv_type)).setBackgroundResource(R.mipmap.lfile_folder_style_green);
         ((TextView)headView.findViewById(R.id.listitem_tv_name)).setText("..");
         ((TextView)headView.findViewById(R.id.listitem_tv_detail)).setText("父目录");
+        headView.findViewById(R.id.listitem_more_btn).setVisibility(View.INVISIBLE);
 
         headView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,19 +151,115 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
         adapter.addHeaderView(headView);
     }
 
-    private void showProgressLayout(){
-        progressLayout.setVisibility(View.VISIBLE);
-        getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-    }
-
-    private void hideProgressLayout(){
-        progressLayout.setVisibility(View.GONE);
-        getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-    }
-
     public void setTitlePath(String path){
         tvPath.setText(path);
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void showPopupMenu(View ancherView , FileItem fileItem){
+        PopupMenu popupMenu = new PopupMenu(Utils.getContext(), ancherView);
+        MenuInflater inflater = popupMenu.getMenuInflater();
+
+        if (presenter.getCurrentClientType() == ClientType.INTERNAL_STORAGE_TYPE){
+            inflater.inflate(R.menu.item_pop_menu_internal_storage, popupMenu.getMenu());
+        }else{
+            inflater.inflate(R.menu.item_pop_menu_ipfs, popupMenu.getMenu());
+        }
+        try {
+            Field field = popupMenu.getClass().getDeclaredField("mPopup");
+            field.setAccessible(true);
+            MenuPopupHelper mPopup = (MenuPopupHelper) field.get(popupMenu);
+            mPopup.setForceShowIcon(true);
+        } catch (Exception e) {
+        }
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.item_pop_menu_ipfs_download:
+                        ((MainActivity)getActivity()).downloadFilePick(fileItem);
+                        break;
+                    case R.id.item_pop_menu_ipfs_more:
+                        ToastUtils.showShortToastSafe("more function todo ipfs");
+                        break;
+                    case R.id.item_pop_menu_internalstorage_more:
+                        ToastUtils.showShortToastSafe("more function todo internal storage");
+                        break;
+                }
+                return true;
+            }
+        });
+        popupMenu.show();
+    }
+
+    private MaterialDialog getProgressDialog(){
+        if (progressDialog == null){
+            progressDialog = new MaterialDialog.Builder(getActivity())
+                    .title(R.string.wait)
+                    .content(R.string.loading)
+                    .progress(true, 0)
+                    .build();
+        }
+
+        return progressDialog;
+
+    }
+
+    private void showTwoButtonDialog(String title , String content){
+        new MaterialDialog.Builder(getActivity())
+                .title(title)
+                .content(content)
+                .positiveText(R.string.ok)
+                .negativeText(R.string.cancel)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
+                    }
+                })
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
+                    }
+                })
+                .show();
+    }
+
+    private void showOneButtonDialog(String content){
+        new MaterialDialog.Builder(getActivity())
+                .title(R.string.warning)
+                .content(content)
+                .positiveText(R.string.ok)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
+                    }
+                })
+                .show();
+    }
+
+    private void showOneButtonDialog(int contentRes){
+        new MaterialDialog.Builder(getActivity())
+                .title(R.string.warning)
+                .content(contentRes)
+                .positiveText(R.string.ok)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
+                    }
+                })
+                .show();
+    }
+
+    private void showProgressDialog(){
+        getProgressDialog().show();
+    }
+
+    private void dismissProgressDialog(){
+        getProgressDialog().hide();
     }
 
     @Override
@@ -166,13 +280,16 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
 
     @Override
     public void showProgressBar() {
-        showProgressLayout();
+        showProgressDialog();
     }
 
     @Override
     public void hideProgressBar() {
-        hideProgressLayout();
+        dismissProgressDialog();
     }
 
-
+    @Override
+    public void showSameFileDialog() {
+        showOneButtonDialog(R.string.warning_same_file_name);
+    }
 }

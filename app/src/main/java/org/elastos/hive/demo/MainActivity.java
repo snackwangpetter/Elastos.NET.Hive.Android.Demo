@@ -1,6 +1,8 @@
 package org.elastos.hive.demo;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
@@ -16,34 +18,37 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.MenuItem;
 import android.view.View;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.leon.lfilepickerlibrary.LFilePicker;
 
 import org.elastos.hive.demo.utils.FileUtils;
 import org.elastos.hive.demo.utils.ToastUtils;
 
-import java.io.File;
+import java.util.List;
 
 import jahirfiquitiva.libs.fabsmenu.FABsMenu;
 import jahirfiquitiva.libs.fabsmenu.TitleFAB;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
     private Toolbar toolbar;
-    private NavigationView navigationView ;
+//    private NavigationView navigationView ;
     private DrawerLayout drawer;
-
     private boolean backPressedToExitOnce = false;
-
     private FABsMenu fabsMenu;
-
     Fragment fragment;
-
-    private TitleFAB newFile , newDirectory , uploadFile ;
+    private TitleFAB newFile , newDirectory , uploadFile = null;
+    private FileItem downloadRealFileItem ;
 
     private final int MENU_TYPE_NEW_FILE = 0;
     private final int MENU_TYPE_NEW_DIRECTORY = 1;
     private final int MENU_TYPE_UPLOAD_FILE = 2 ;
-
+    private final int REQUESTCODE_UPLOAD_FILE = 1000;
+    private final int REQUESTCODE_DOWNLOAD_FILE = 1001;
 
 
     private String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
@@ -118,22 +123,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initialiseFab();
     }
 
+    @SuppressLint("RestrictedApi")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         int id = menuItem.getItemId();
-
+        fabsMenu.collapse();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         switch (id){
             case R.id.internalstorage:
+                removeUploadFileTitleFAB();
                 toolbar.setTitle(R.string.internalstorage);
                 ((MainFragment)fragment).presenter.changeClientType(ClientType.INTERNAL_STORAGE_TYPE);
-
                 break;
             case R.id.onedrive:
+                createUploadFileTitleFAB();
                 toolbar.setTitle(R.string.onedrive);
                 ((MainFragment)fragment).presenter.changeClientType(ClientType.ONEDRIVE_TYPE);
                 break;
             case R.id.ipfs:
+                createUploadFileTitleFAB();
                 toolbar.setTitle(R.string.ipfs);
                 ((MainFragment)fragment).presenter.changeClientType(ClientType.IPFS_TYPE);
                 break;
@@ -152,12 +160,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         newFile = findViewById(R.id.menu_new_file);
         newDirectory = findViewById(R.id.menu_new_folder);
-        uploadFile = findViewById(R.id.menu_upload_file);
 
         initFabTitle(newDirectory, MENU_TYPE_NEW_DIRECTORY);
         initFabTitle(newFile, MENU_TYPE_NEW_FILE);
-        initFabTitle(uploadFile , MENU_TYPE_UPLOAD_FILE);
-
     }
 
     private void initFabTitle(TitleFAB fabTitle, int type) {
@@ -165,24 +170,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             String currentPath = ((MainFragment)getFragmentAtFrame()).presenter.getCurrentPath();
             switch (type){
                 case MENU_TYPE_NEW_DIRECTORY:
-                    ToastUtils.showShortToastSafe(currentPath+" ; type = 0");
-
-                    ((MainFragment)getFragmentAtFrame()).presenter.createDirectory(currentPath+"/test"+System.currentTimeMillis());
+                    showInputDialog(R.string.create_new_dir,R.string.create_new_dir_content,
+                            R.string.directory , currentPath , MENU_TYPE_NEW_DIRECTORY);
                     break;
                 case MENU_TYPE_NEW_FILE:
-                    ToastUtils.showShortToastSafe(currentPath+" ; type = 1");
-                    ((MainFragment)getFragmentAtFrame()).presenter.createFile(currentPath+"/test"+System.currentTimeMillis());
+                    showInputDialog(R.string.create_new_file,R.string.create_new_file_content,
+                            R.string.file , currentPath , MENU_TYPE_NEW_FILE);
                     break;
-
                 case MENU_TYPE_UPLOAD_FILE:
-
-                    String internalFilePath = "/storage/emulated/0/test.txt";
-                    File file = new File(internalFilePath);
-                    String fileName = file.getName();
-                    String ipfsAbsFilePath = FileUtils.appendParentPath(currentPath,fileName);
-
-                    ((MainFragment)getFragmentAtFrame()).presenter.uploadFile(ipfsAbsFilePath,internalFilePath);
-                    ToastUtils.showShortToastSafe(currentPath+" ; type = 2");
+                    uploadFilePick();
             }
             fabsMenu.collapse();
         });
@@ -221,4 +217,99 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    private void showInputDialog(int title , int content , int hint , String currentPath , int type){
+        new MaterialDialog.Builder(MainActivity.this)
+                .title(title)
+                .content(content)
+                .negativeText("cancel")
+                .positiveText("ok")
+                .input(hint, hint, new MaterialDialog.InputCallback() {
+                    @Override
+                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+                    }
+                })
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        String name = dialog.getInputEditText().getText().toString();
+                        switch (type){
+                            case MENU_TYPE_NEW_FILE:
+                                ((MainFragment)getFragmentAtFrame()).presenter.
+                                        createFile(FileUtils.appendParentPath(currentPath,name));
+                                break;
+                            case MENU_TYPE_NEW_DIRECTORY:
+                                ((MainFragment)getFragmentAtFrame()).presenter.
+                                        createDirectory(FileUtils.appendParentPath(currentPath,name));
+                                break;
+                        }
+                    }
+                })
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                    }
+                })
+                .show();
+    }
+
+    private void uploadFilePick(){
+        new LFilePicker()
+                .withActivity(MainActivity.this)
+                .withRequestCode(REQUESTCODE_UPLOAD_FILE)
+                .withStartPath(Config.DEFAULT_UPLOAD_PICK_FILE_PATH)//指定初始显示路径
+                .withMutilyMode(false)
+                .start();
+    }
+
+    public void downloadFilePick(FileItem realFileItem){
+        downloadRealFileItem = realFileItem ;
+        new LFilePicker()
+                .withActivity(MainActivity.this)
+                .withRequestCode(REQUESTCODE_DOWNLOAD_FILE)
+                .withChooseMode(false)
+                .withStartPath(Config.DEFAULT_DOWNLOAD_PICK_FILE_PATH)//指定初始显示路径
+                .withMutilyMode(false)
+                .start();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUESTCODE_UPLOAD_FILE) {
+                List<String> list = data.getStringArrayListExtra("paths");
+                String fileAbsPath = list.get(0);
+                ToastUtils.showShortToastSafe(fileAbsPath);
+                uploadFile(fileAbsPath);
+            }
+
+            if (requestCode == REQUESTCODE_DOWNLOAD_FILE) {
+                String path = data.getStringExtra("path");
+                ToastUtils.showShortToastSafe("path="+path);
+                ((MainFragment)getFragmentAtFrame()).presenter.excuteFile(downloadRealFileItem , path);
+            }
+        }
+    }
+
+    private void uploadFile(String saveFileAbsPath){
+        ((MainFragment)getFragmentAtFrame()).presenter.uploadFile(saveFileAbsPath);
+    }
+
+    private void removeUploadFileTitleFAB(){
+        if (uploadFile !=null){
+            fabsMenu.removeButton(uploadFile);
+            uploadFile = null ;
+        }
+
+    }
+    private void createUploadFileTitleFAB(){
+        if (uploadFile == null){
+            uploadFile = new TitleFAB(MainActivity.this);
+            uploadFile.setTitle("uploadFile");
+            uploadFile.setSize(TitleFAB.SIZE_MINI);
+            uploadFile.setImageResource(R.mipmap.file_fab);
+            fabsMenu.addButton(uploadFile);
+            initFabTitle(uploadFile, MENU_TYPE_UPLOAD_FILE);
+        }
+    }
 }
