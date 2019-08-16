@@ -25,7 +25,12 @@ public class InitAction extends AsyncTask<Void,String, Drive> {
     protected Drive doInBackground(Void... voids) {
         Drive drive = null ;
         if (dataCenter instanceof IPFSDataCenter){
-            ((IPFSDataCenter) dataCenter).doInit();
+            try{
+                ((IPFSDataCenter) dataCenter).doInit();
+            }catch (Exception e){
+                actionCallback.onFail(ActionType.ACTION_INIT,e);
+            }
+
         }
         return drive;
     }

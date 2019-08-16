@@ -1,6 +1,9 @@
 package org.elastos.hive.demo;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 
 import org.elastos.hive.demo.action.ActionType;
 import org.elastos.hive.demo.base.ActionCallback;
@@ -25,6 +28,8 @@ public class MainPresenter extends BasePresenter {
     private ClientType currentClientType = ClientType.INTERNAL_STORAGE_TYPE;
     private ClientType lastClentType = ClientType.INTERNAL_STORAGE_TYPE;
 
+    private final int MESSAGE_FAIL = 0;
+
     private BaseDataCenter getDataCenter(){
         switch (currentClientType){
             case IPFS_TYPE:
@@ -37,8 +42,9 @@ public class MainPresenter extends BasePresenter {
 
                         @Override
                         public void onFail(ActionType type, Exception e) {
-                            iView.hideProgressBar();
-                            ToastUtils.showShortToastSafe(e.getMessage());
+                            Message message = new Message();
+                            message.what = MESSAGE_FAIL;
+                            handler.sendMessage(message);
                         }
 
                         @Override
@@ -54,12 +60,9 @@ public class MainPresenter extends BasePresenter {
                                     iView.refreshListViewFinish();
                                     break;
                                 case ACTION_CREATE_DIR:
-                                    refreshData();
-                                    break;
                                 case ACTION_CREATE_File:
-                                    refreshData();
-                                    break;
                                 case ACTION_UPLOAD_FILE:
+                                case ACTION_DELETE_FILE:
                                     refreshData();
                                     break;
                             }
@@ -234,6 +237,16 @@ public class MainPresenter extends BasePresenter {
         }
     }
 
+    public void deleteFile(String absFilePath){
+        switch (currentClientType){
+            case INTERNAL_STORAGE_TYPE:
+                break;
+            case IPFS_TYPE:
+                ((IPFSDataCenter)getDataCenter()).deleteFile(absFilePath);
+                break;
+        }
+    }
+
     public void returnParent(){
         String parentPath = FileUtils.getParent(getCurrentPath());
         setCurrentPath(parentPath);
@@ -253,6 +266,17 @@ public class MainPresenter extends BasePresenter {
         return currentClientType ;
     }
 
+
+    @SuppressLint("HandlerLeak")
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == MESSAGE_FAIL) {
+                iView.hideProgressBar();
+                iView.showConnectionWrong();
+            }
+        }
+    };
     public interface IView{
         void refreshListView(ArrayList<FileItem> items);
         void refreshTitleView(String path);
@@ -264,5 +288,7 @@ public class MainPresenter extends BasePresenter {
         void hideProgressBar();
 
         void showSameFileDialog();
+
+        void showConnectionWrong();
     }
 }

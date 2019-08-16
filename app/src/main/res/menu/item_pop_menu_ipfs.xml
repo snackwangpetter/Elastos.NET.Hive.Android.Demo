@@ -7,6 +7,11 @@
         android:title="@string/download"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/item_pop_menu_ipfs_delete"
+        android:orderInCategory="100"
+        android:title="@string/delete"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/item_pop_menu_ipfs_more"
         android:orderInCategory="100"
         android:title="@string/more"

@@ -25,7 +25,12 @@ public class CreateFileAction extends AsyncTask <Void,String,File>{
         File file = null;
 
         if (dataCenter instanceof IPFSDataCenter){
-            file = ((IPFSDataCenter) dataCenter).doCreateFile(fileAbsPath);
+            try{
+                file = ((IPFSDataCenter) dataCenter).doCreateFile(fileAbsPath);
+            }catch (Exception e){
+                actionCallback.onFail(ActionType.ACTION_CREATE_File , e);
+            }
+
         }
         return file;
     }

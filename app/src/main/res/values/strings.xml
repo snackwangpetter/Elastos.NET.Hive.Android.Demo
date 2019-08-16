@@ -27,7 +27,14 @@
     <string name="detail">Detail</string>
 
     <string name="download">Download</string>
+    <string name="delete">Delete</string>
     <string name="more">More</string>
 
+    <string name="prompt">Prompt</string>
+
+    <string name="confirm_delete">Confirm deleting this file</string>
+
     <string name="warning_same_file_name">Warning: a file or folder with the same name has been detected</string>
+
+    <string name="connect_error">Error:Network connection is abnormal, please contact administrator</string>
 </resources>

@@ -9,47 +9,48 @@ import org.elastos.hive.demo.base.BaseDataCenter;
 
 import java.util.concurrent.ExecutionException;
 
-public class UploadFileAction extends AsyncTask <Void,String,Void>{
+public class DeleteFileAction extends AsyncTask <Void,String,Void>{
 
     private ActionCallback actionCallback ;
     private BaseDataCenter dataCenter ;
-    private String internalFileAbsPath , ipfsAbsPath;
-    public UploadFileAction(BaseDataCenter dataCenter , ActionCallback actionCallback ,
-                            String internalFileAbsPath , String ipfsAbsPath){
+    private String fileAbsPath ;
+    public DeleteFileAction(BaseDataCenter dataCenter , ActionCallback actionCallback , String fileAbsPath){
         this.actionCallback = actionCallback ;
         this.dataCenter = dataCenter ;
-        this.internalFileAbsPath = internalFileAbsPath ;
-        this.ipfsAbsPath = ipfsAbsPath ;
+        this.fileAbsPath = fileAbsPath ;
     }
 
 
     @Override
     protected Void doInBackground(Void... voids) {
-        Void voidField = null ;
+        Void voidFeild = null;
+
         if (dataCenter instanceof IPFSDataCenter){
             try {
-                ((IPFSDataCenter) dataCenter).doUploadFile(ipfsAbsPath,internalFileAbsPath);
+                ((IPFSDataCenter) dataCenter).doDeleteFile(fileAbsPath);
             } catch (ExecutionException e) {
+                actionCallback.onFail(ActionType.ACTION_DELETE_FILE,e);
                 e.printStackTrace();
             } catch (InterruptedException e) {
+                actionCallback.onFail(ActionType.ACTION_DELETE_FILE,e);
                 e.printStackTrace();
             } catch (Exception e){
-                actionCallback.onFail(ActionType.ACTION_UPLOAD_FILE , e);
+                actionCallback.onFail(ActionType.ACTION_DELETE_FILE , e);
             }
         }
-        return voidField ;
+        return voidFeild;
     }
 
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        actionCallback.onPreAction(ActionType.ACTION_UPLOAD_FILE);
+        actionCallback.onPreAction(ActionType.ACTION_DELETE_FILE);
     }
 
     @Override
-    protected void onPostExecute(Void voidField) {
-        super.onPostExecute(voidField);
-        actionCallback.onSuccess(ActionType.ACTION_UPLOAD_FILE,voidField);
+    protected void onPostExecute(Void voidFeild) {
+        super.onPostExecute(voidFeild);
+        actionCallback.onSuccess(ActionType.ACTION_DELETE_FILE,voidFeild);
     }
 }

@@ -179,6 +179,10 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
                     case R.id.item_pop_menu_ipfs_download:
                         ((MainActivity)getActivity()).downloadFilePick(fileItem);
                         break;
+                    case R.id.item_pop_menu_ipfs_delete:
+                        showConfirmDeleteDialog(fileItem.getFileAbsPath());
+
+                        break;
                     case R.id.item_pop_menu_ipfs_more:
                         ToastUtils.showShortToastSafe("more function todo ipfs");
                         break;
@@ -205,22 +209,21 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
 
     }
 
-    private void showTwoButtonDialog(String title , String content){
+    private void showConfirmDeleteDialog(String filePath){
         new MaterialDialog.Builder(getActivity())
-                .title(title)
-                .content(content)
+                .title(R.string.prompt)
+                .content(R.string.confirm_delete)
                 .positiveText(R.string.ok)
                 .negativeText(R.string.cancel)
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-
+                        presenter.deleteFile(filePath);
                     }
                 })
                 .onNegative(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-
                     }
                 })
                 .show();
@@ -259,7 +262,10 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
     }
 
     private void dismissProgressDialog(){
-        getProgressDialog().hide();
+        if (getProgressDialog().isShowing()){
+            getProgressDialog().hide();
+        }
+
     }
 
     @Override
@@ -291,5 +297,11 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
     @Override
     public void showSameFileDialog() {
         showOneButtonDialog(R.string.warning_same_file_name);
+    }
+
+    @Override
+    public void showConnectionWrong() {
+        showOneButtonDialog(R.string.connect_error);
+//        ToastUtils.showShortToastSafe(R.string.connect_error);
     }
 }

@@ -13,6 +13,7 @@ import org.elastos.hive.IPFSEntry;
 import org.elastos.hive.Length;
 import org.elastos.hive.demo.action.CreateDirectoryAction;
 import org.elastos.hive.demo.action.CreateFileAction;
+import org.elastos.hive.demo.action.DeleteFileAction;
 import org.elastos.hive.demo.action.DownloadFileAction;
 import org.elastos.hive.demo.action.GetChildrenAndInfoAction;
 import org.elastos.hive.demo.action.GetInfoAction;
@@ -160,17 +161,8 @@ public class IPFSDataCenter extends BaseDataCenter {
 
     }
 
-    public File doGetFile(String path){
-        File file = null;
-        try {
-            file = drive.getFile(path).get();
-
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+    public File doGetFile(String path) throws ExecutionException, InterruptedException {
+        File file = drive.getFile(path).get();
         return file ;
     }
 
@@ -236,4 +228,14 @@ public class IPFSDataCenter extends BaseDataCenter {
             }
         }
     }
+
+    public void deleteFile(String ipfsAbsPath){
+        new DeleteFileAction(this,actionCallback,ipfsAbsPath).execute();
+    }
+
+    public void doDeleteFile(String ipfsAbsPath) throws ExecutionException, InterruptedException {
+        File file = doGetFile(ipfsAbsPath);
+        file.deleteItem().get();
+    }
+
 }

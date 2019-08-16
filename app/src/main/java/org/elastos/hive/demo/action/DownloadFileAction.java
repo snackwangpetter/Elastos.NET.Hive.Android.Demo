@@ -33,6 +33,8 @@ public class DownloadFileAction extends AsyncTask <Void,String, Length>{
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } catch (Exception e){
+                actionCallback.onFail(ActionType.ACTION_DOWNLOAD_FILE , e);
             }
         }
         return length ;

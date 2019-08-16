@@ -24,7 +24,12 @@ public class CreateDirectoryAction extends AsyncTask <Void,String,Directory>{
         Directory directory = null;
 
         if (dataCenter instanceof IPFSDataCenter){
-            ((IPFSDataCenter) dataCenter).docreateDirectory(fileAbsPath);
+            try{
+                ((IPFSDataCenter) dataCenter).docreateDirectory(fileAbsPath);
+            }catch (Exception e){
+                actionCallback.onFail(ActionType.ACTION_CREATE_DIR , e);
+            }
+
         }
         return directory;
     }

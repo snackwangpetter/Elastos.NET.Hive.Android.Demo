@@ -8,6 +8,8 @@ import org.elastos.hive.demo.IPFSDataCenter;
 import org.elastos.hive.demo.base.ActionCallback;
 import org.elastos.hive.demo.base.BaseDataCenter;
 
+import java.util.concurrent.ExecutionException;
+
 public class GetFileAction extends AsyncTask<Void,String, File> {
     private ActionCallback actionCallback ;
     private BaseDataCenter dataCenter ;
@@ -24,7 +26,17 @@ public class GetFileAction extends AsyncTask<Void,String, File> {
         File file = null;
 
         if (dataCenter instanceof IPFSDataCenter){
-            ((IPFSDataCenter) dataCenter).doGetFile(path);
+            try {
+                ((IPFSDataCenter) dataCenter).doGetFile(path);
+            } catch (ExecutionException e) {
+                actionCallback.onFail(ActionType.ACTION_GET_FILE,e);
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                actionCallback.onFail(ActionType.ACTION_GET_FILE,e);
+                e.printStackTrace();
+            } catch (Exception e){
+                actionCallback.onFail(ActionType.ACTION_GET_FILE,e);
+            }
         }
         return file;
     }
