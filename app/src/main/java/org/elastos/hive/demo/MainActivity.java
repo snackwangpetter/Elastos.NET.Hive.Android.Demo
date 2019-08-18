@@ -18,7 +18,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.text.InputType;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -27,6 +26,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.leon.lfilepickerlibrary.LFilePicker;
 
 import org.elastos.hive.demo.utils.FileUtils;
+import org.elastos.hive.demo.utils.OpenFileHelper;
 import org.elastos.hive.demo.utils.ToastUtils;
 
 import java.util.List;
@@ -311,5 +311,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             fabsMenu.addButton(uploadFile);
             initFabTitle(uploadFile, MENU_TYPE_UPLOAD_FILE);
         }
+    }
+
+    public void openFile(String filepath){
+        startActivity(OpenFileHelper.openFile(this,filepath));
     }
 }

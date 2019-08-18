@@ -94,6 +94,8 @@ public class MainFragment extends BaseFragment implements MainPresenter.IView{
                     if (presenter.getCurrentClientType() != ClientType.INTERNAL_STORAGE_TYPE){
                         showOneButtonDialog("Cannot open the remote file directly, please download the file locally first");
                     }else{
+
+                        ((MainActivity)getActivity()).openFile(fileAbsPath);
                         ToastUtils.showShortToast("click: "+fileAbsPath);
                     }
                 }
