@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(this);
-        navigationView.setCheckedItem(R.id.internalstorage);
+        navigationView.setCheckedItem(R.id.nav_internalstorage);
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,20 +130,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fabsMenu.collapse();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         switch (id){
-            case R.id.internalstorage:
+            case R.id.nav_internalstorage:
                 removeUploadFileTitleFAB();
                 toolbar.setTitle(R.string.internalstorage);
                 ((MainFragment)fragment).presenter.changeClientType(ClientType.INTERNAL_STORAGE_TYPE);
                 break;
-            case R.id.onedrive:
+            case R.id.nav_onedrive:
                 createUploadFileTitleFAB();
                 toolbar.setTitle(R.string.onedrive);
                 ((MainFragment)fragment).presenter.changeClientType(ClientType.ONEDRIVE_TYPE);
                 break;
-            case R.id.ipfs:
+            case R.id.nav_ipfs:
                 createUploadFileTitleFAB();
                 toolbar.setTitle(R.string.ipfs);
                 ((MainFragment)fragment).presenter.changeClientType(ClientType.IPFS_TYPE);
+                break;
+            case R.id.nav_personal_info:
+                ToastUtils.showShortToastSafe("nav_personal_info");
+                break;
+            case R.id.nav_myfriends:
+                ToastUtils.showShortToastSafe("nav_myfriends");
+                break;
+            case R.id.nav_addfriend:
+                ToastUtils.showShortToastSafe("nav_addfriend");
+                break;
+            case R.id.nav_settings:
+                ToastUtils.showShortToastSafe("nav_settings");
                 break;
         }
         drawer.closeDrawers();
