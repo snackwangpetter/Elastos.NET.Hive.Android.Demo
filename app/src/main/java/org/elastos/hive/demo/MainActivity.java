@@ -10,7 +10,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,11 +19,17 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.leon.lfilepickerlibrary.LFilePicker;
 
+import org.elastos.hive.demo.activity.MyFriendsActivity;
+import org.elastos.hive.demo.activity.PersonalActivity;
+import org.elastos.hive.demo.activity.SimpleCarrier;
 import org.elastos.hive.demo.utils.FileUtils;
 import org.elastos.hive.demo.utils.OpenFileHelper;
 import org.elastos.hive.demo.utils.ToastUtils;
@@ -47,28 +52,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final int MENU_TYPE_NEW_FILE = 0;
     private final int MENU_TYPE_NEW_DIRECTORY = 1;
     private final int MENU_TYPE_UPLOAD_FILE = 2 ;
-    private final int REQUESTCODE_UPLOAD_FILE = 1000;
-    private final int REQUESTCODE_DOWNLOAD_FILE = 1001;
+    private final int REQUEST_CODE_UPLOAD_FILE = 1000;
+    private final int REQUEST_CODE_DOWNLOAD_FILE = 1001;
+    private final int REQUEST_CODE_QR = IntentIntegrator.REQUEST_CODE ;
 
 
-    private String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    private String[] storagePermissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    private String[] cameraPermissions = {Manifest.permission.CAMERA};
     private final int REQUEST_STOREAGE_PERMISSION = 1234;
+    private final int REQUEST_CAMERA_PERMISSION = 1235;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            int checkSelfPermission = ContextCompat.checkSelfPermission(getApplicationContext(), permissions[0]);
-            if (checkSelfPermission != PackageManager.PERMISSION_GRANTED) {
-                startRequestPermission();
-            }
+
+        if (!checkPermissions(storagePermissions)){
+            startRequestPermission(storagePermissions,REQUEST_STOREAGE_PERMISSION);
         }
+
+        if (!checkPermissions(cameraPermissions)){
+            startRequestPermission(storagePermissions,REQUEST_CAMERA_PERMISSION);
+        }
+
         setContentView(R.layout.activity_main);
 
         initView();
-    }
-
-    private void startRequestPermission() {
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_STOREAGE_PERMISSION);
     }
 
     private void initView() {
@@ -128,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         int id = menuItem.getItemId();
         fabsMenu.collapse();
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         switch (id){
             case R.id.nav_internalstorage:
                 removeUploadFileTitleFAB();
@@ -146,12 +153,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 ((MainFragment)fragment).presenter.changeClientType(ClientType.IPFS_TYPE);
                 break;
             case R.id.nav_personal_info:
+                jumpToPersonalPage();
                 ToastUtils.showShortToastSafe("nav_personal_info");
                 break;
             case R.id.nav_myfriends:
+                jumpMyFriendsPage();
                 ToastUtils.showShortToastSafe("nav_myfriends");
                 break;
             case R.id.nav_addfriend:
+                AddFriend();
                 ToastUtils.showShortToastSafe("nav_addfriend");
                 break;
             case R.id.nav_settings:
@@ -221,10 +231,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_STOREAGE_PERMISSION) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    ToastUtils.showShortToastSafe("Access failed, open manually!");
-                }
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                ToastUtils.showShortToastSafe("Access failed, open manually!");
+            }
+        }
+
+        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                ToastUtils.showShortToastSafe("Access failed, open manually!");
             }
         }
     }
@@ -267,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void uploadFilePick(){
         new LFilePicker()
                 .withActivity(MainActivity.this)
-                .withRequestCode(REQUESTCODE_UPLOAD_FILE)
+                .withRequestCode(REQUEST_CODE_UPLOAD_FILE)
                 .withStartPath(Config.DEFAULT_UPLOAD_PICK_FILE_PATH)//指定初始显示路径
                 .withMutilyMode(false)
                 .start();
@@ -277,7 +291,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         downloadRealFileItem = realFileItem ;
         new LFilePicker()
                 .withActivity(MainActivity.this)
-                .withRequestCode(REQUESTCODE_DOWNLOAD_FILE)
+                .withRequestCode(REQUEST_CODE_DOWNLOAD_FILE)
                 .withChooseMode(false)
                 .withStartPath(Config.DEFAULT_DOWNLOAD_PICK_FILE_PATH)//指定初始显示路径
                 .withMutilyMode(false)
@@ -288,18 +302,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            if (requestCode == REQUESTCODE_UPLOAD_FILE) {
+            if (requestCode == REQUEST_CODE_UPLOAD_FILE) {
                 List<String> list = data.getStringArrayListExtra("paths");
                 String fileAbsPath = list.get(0);
                 ToastUtils.showShortToastSafe(fileAbsPath);
                 uploadFile(fileAbsPath);
             }
 
-            if (requestCode == REQUESTCODE_DOWNLOAD_FILE) {
+            if (requestCode == REQUEST_CODE_DOWNLOAD_FILE) {
                 String path = data.getStringExtra("path");
                 ToastUtils.showShortToastSafe("path="+path);
                 ((MainFragment)getFragmentAtFrame()).presenter.excuteFile(downloadRealFileItem , path);
             }
+
+            if (requestCode == REQUEST_CODE_QR){
+                ToastUtils.showShortToastSafe("REQUEST_CODE_QR "+requestCode +" ; "+resultCode);
+                IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+                if (scanResult != null) {
+                    String result = scanResult.getContents();
+                    ToastUtils.showShortToastSafe("result = "+result);
+                    if (result != null && !result.isEmpty()) {
+                        //TODO Add friend.
+                        SimpleCarrier sSimpleCarrier = ((HiveApplication)this.getApplication()).getCarrier();
+                        sSimpleCarrier.AddFriend(result);
+                        Toast.makeText(this, "Added successfully!", Toast.LENGTH_LONG).show();
+                    }
+                    return;
+                }
+            }
+
         }
     }
 
@@ -328,4 +359,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void openFile(String filepath){
         startActivity(OpenFileHelper.openFile(this,filepath));
     }
+
+    private void jumpToPersonalPage(){
+        Intent intent = new Intent(this, PersonalActivity.class);
+        startActivity(intent);
+    }
+
+    private void jumpMyFriendsPage(){
+        Intent intent = new Intent(this, MyFriendsActivity.class);
+        startActivity(intent);
+    }
+
+    private void jumpToAddFriendsPage(){
+        AddFriend();
+    }
+
+    private void AddFriend() {
+        IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
+//        integrator.setRequestCode(REQUEST_CODE_QR) ;
+        integrator.initiateScan();
+    }
+
+    private void startRequestPermission(String[] permissions , int requestCode){
+        ActivityCompat.requestPermissions(this, permissions, requestCode);
+    }
+
+    private boolean checkPermissions(String[] permissions){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            int checkSelfPermission = ContextCompat.checkSelfPermission(getApplicationContext(), permissions[0]);
+            if (checkSelfPermission == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+            return false ;
+        }
+        return true ;
+    }
+
 }

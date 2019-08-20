@@ -44,5 +44,10 @@ dependencies {
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
 
     implementation 'com.leon:lfilepickerlibrary:1.8.0'
+    implementation 'org.elastos:carrier:5.3.2'
+
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
+    implementation 'com.google.zxing:core:3.3.3'
+
     implementation project(':Elastos.NET.Hive.Java.SDK')
 }

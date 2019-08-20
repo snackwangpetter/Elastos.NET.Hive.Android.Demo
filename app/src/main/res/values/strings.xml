@@ -50,4 +50,6 @@
     <string name="warning_same_file_name">Warning: a file or folder with the same name has been detected</string>
 
     <string name="connect_error">Error:Network connection is abnormal, please contact administrator</string>
+
+    <string name="carrier_ready">Carrier is ready!</string>
 </resources>
